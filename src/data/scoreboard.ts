@@ -27,3 +27,13 @@ export function saveScore(entry: ScoreEntry): void {
   board.sort((a, b) => b.score - a.score);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(board.slice(0, MAX_ENTRIES)));
 }
+
+export function removeScore(index: number): void {
+  const board = getScoreboard();
+  board.splice(index, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+}
+
+export function clearScoreboard(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}

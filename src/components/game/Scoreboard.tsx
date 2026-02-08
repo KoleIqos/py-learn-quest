@@ -1,10 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { getScoreboard, ScoreEntry } from "@/data/scoreboard";
-import { Trophy, Target, Flame, Crown } from "lucide-react";
+import { getScoreboard, removeScore, clearScoreboard, ScoreEntry } from "@/data/scoreboard";
+import { Trophy, Target, Flame, Crown, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 export default function Scoreboard() {
-  const [scores] = useState<ScoreEntry[]>(getScoreboard);
+  const [scores, setScores] = useState<ScoreEntry[]>(getScoreboard);
+
+  const handleRemove = (index: number) => {
+    removeScore(index);
+    setScores(getScoreboard());
+  };
+
+  const handleClearAll = () => {
+    clearScoreboard();
+    setScores([]);
+  };
 
   if (scores.length === 0) return null;
 
@@ -18,27 +28,34 @@ export default function Scoreboard() {
       <div className="flex items-center justify-center gap-2 mb-4">
         <Crown className="h-5 w-5 text-accent" />
         <h3 className="text-lg font-bold text-foreground">Scoreboard</h3>
+        <button
+          onClick={handleClearAll}
+          title="Clear all scores"
+          className="ml-2 rounded-md p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        {/* Header */}
-        <div className="grid grid-cols-[2rem_1fr_4rem_3.5rem_3rem] gap-2 px-4 py-2.5 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <div className="grid grid-cols-[2rem_1fr_4rem_3.5rem_3rem_1.5rem] gap-2 px-4 py-2.5 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           <span>#</span>
           <span>Player</span>
           <span className="text-right">Score</span>
           <span className="text-right">Acc</span>
           <span className="text-right">🔥</span>
+          <span></span>
         </div>
 
-        {/* Rows */}
         <AnimatePresence>
           {scores.map((entry, i) => (
             <motion.div
               key={`${entry.playerName}-${entry.date}-${i}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
               transition={{ delay: i * 0.05 }}
-              className={`grid grid-cols-[2rem_1fr_4rem_3.5rem_3rem] gap-2 px-4 py-3 text-sm border-t border-border items-center ${
+              className={`grid grid-cols-[2rem_1fr_4rem_3.5rem_3rem_1.5rem] gap-2 px-4 py-3 text-sm border-t border-border items-center ${
                 i === 0 ? "bg-primary/5" : ""
               }`}
             >
@@ -52,6 +69,13 @@ export default function Scoreboard() {
               <span className="text-right font-semibold text-foreground">{entry.score}</span>
               <span className="text-right text-muted-foreground">{entry.accuracy}%</span>
               <span className="text-right text-muted-foreground">{entry.bestStreak}</span>
+              <button
+                onClick={() => handleRemove(i)}
+                title="Remove score"
+                className="text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>
